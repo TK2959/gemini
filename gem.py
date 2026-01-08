@@ -2,40 +2,40 @@ import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
-# Configure the API with your key
+# Configure the API
 genai.configure(api_key=os.getenv('API_KEY'))
 
-# Initialize the model (use the "gemini-1.5-flash" model or whichever is appropriate)
-model = genai.GenerativeModel("gemini-1.5-flash")
+# System message to define the persona
+pirate_instructions = "You are a pirate chatbot. Respond only in pirate speak, using pirate slang and nautical terms. Do not reply in normal English."
 
-# System message to guide the model to respond in pirate speak
-system_message = "You are a pirate chatbot. Respond only in pirate speak, using pirate slang and nautical terms. Do not reply in normal English."
+# Initialize the model with system instructions
+model = genai.GenerativeModel(
+    model_name="gemini-3-flash-preview",
+    system_instruction=pirate_instructions
+)
 
-# Function to generate responses in pirate speak
-def generate_pirate_response(user_message):
-    # Combine the system message with the user's input to guide the model's response
-    prompt = f"{system_message} User: {user_message} Pirate Response:"
-
-    # Generate the response using the model
-    response = model.generate_content(prompt)
-
-    return response.text
-
-# Example of interacting with the chatbot
-if __name__ == "__main__":
+def start_chat():
+    # Start a chat session to maintain context (optional but recommended)
+    chat_session = model.start_chat(history=[])
+    
+    print("Ahoy! The salty dog is ready to chat. (Type 'exit' to abandon ship)")
+    
     while True:
-        # Get user input
-        message = input("Enter your message (or type 'exit' to quit): ")
+        user_input = input("You: ")
         
-        if message.lower() == 'exit':
-            print("Exiting the chat...")
+        if user_input.lower() == 'exit':
+            print("Fair winds and following seas, matey!")
             break
         
-        # Get the pirate response
-        pirate_response = generate_pirate_response(message)
-        
-        # Print the pirate response
-        print("Pirate Response:", pirate_response)
+        try:
+            # Send message to the model
+            response = chat_session.send_message(user_input)
+            print(f"\nPirate: {response.text}\n")
+        except Exception as e:
+            print(f"Blimey! An error occurred: {e}")
+
+if __name__ == "__main__":
+    start_chat()
